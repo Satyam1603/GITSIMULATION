@@ -1,25 +1,53 @@
 # ⚡ GitChain Live
 
 > **Real-Time Interactive Git Commit Chain & Push Status Visualizer**  
-> Connects to any local Git repository (ongoing or completed) and renders a live, interactive topological commit DAG directly in your web browser.
+> Connects to any ongoing or completed Git repository and renders a real-time, interactive topological commit DAG directly in your web browser.
+
+---
+
+## ⚡ Quick Run Instructions (Get Started in 30 Seconds)
+
+### Step 1: Open your Terminal / PowerShell
+Navigate into the project folder:
+```powershell
+cd "c:\Users\satya\OneDrive\Desktop\DevopsProject\GITSIMULATION"
+```
+
+### Step 2: Install Dependencies
+```powershell
+npm install
+```
+
+### Step 3: Start the Application
+```powershell
+npm start
+```
+
+### Step 4: Open in Your Browser
+Once started, open your web browser (Chrome, Edge, Brave, Firefox) and navigate to:
+```
+http://localhost:3000
+```
+
+> **Tip:** You can also run `node demo-repo-creator.js` at any time to generate a rich sample repository with multiple branches, tags, and merge commits for testing!
 
 ---
 
 ## 🌟 Overview
 
-**GitChain Live** gives developers, DevOps engineers, and teams immediate visual clarity over their Git repository history and synchronization state. 
+**GitChain Live** provides developers, DevOps engineers, and teams with clear, live visual feedback on their Git commit graph and synchronization status.
 
-Whenever you run Git commands in your terminal or IDE (`git commit`, `git checkout`, `git merge`, `git push`), **GitChain Live automatically updates the browser diagram in real-time** via WebSockets and filesystem watchers—no manual page refresh required!
+Whenever you run Git commands in your terminal or IDE (`git commit`, `git checkout`, `git merge`, `git push`), **GitChain Live automatically updates the browser diagram in real time** via WebSockets and filesystem watchers—no manual refresh needed!
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- **🌐 Browser-Based & Connects to Any Project:** Enter any absolute or relative repository directory path (e.g. `C:/Projects/my-app` or `../my-project`) and inspect it immediately.
-- **⚡ Real-Time Instant Sync:** Employs low-overhead filesystem event monitoring on `.git/HEAD`, `.git/refs/`, and `.git/index` coupled with WebSocket events to reflect changes instantly.
-- **☁️ Clear Pushed vs. Unpushed Commit Distinction:**
-  - 🟢 **Pushed Commits:** Solid emerald nodes with a `[✓ Pushed]` badge indicating they are already synchronized with a remote tracking branch (`origin/*`).
-  - 🟡 **Local / Unpushed Commits:** Dashed amber glowing nodes with a `[↑ Local]` badge indicating changes exist only locally and need `git push`.
+- **🌐 Browser-Based & Connects to Any Project:** Enter any absolute or relative repository directory path (e.g., `C:/Projects/my-app` or `../other-repo`) in the UI to visualize it immediately.
+- **⚡ Real-Time Live Sync:** Watches `.git/HEAD`, `.git/refs/`, and `.git/index` using low-latency debounced filesystem events and pushes updates via WebSockets instantly.
+- **☁️ Distinct Pushed vs. Unpushed Commit Indicators:**
+  - 🟢 **Pushed Commits:** Solid emerald nodes with a `[✓ Pushed]` badge indicating they are synchronized with a remote tracking branch (`origin/*`).
+  - 🟡 **Local / Unpushed Commits:** Dashed amber glowing nodes with a `[↑ Local]` badge indicating changes exist only locally.
 - **🎯 Dynamic Chain & Swimlane DAG Diagram:**
   - Branch fork and merge curves drawn with smooth cubic Bézier splines.
   - Distinct lane colors for branches.
@@ -78,13 +106,13 @@ flowchart TD
 
 ---
 
-## 🚀 Quick Start Guide
+## 🚀 Detailed Setup Guide
 
 ### 1. Prerequisites
 - **Node.js** (v18.0.0 or higher recommended)
 - **Git** (installed and in your system `PATH`)
 
-Check that they are available:
+Verify in your terminal:
 ```bash
 node -v
 git --version
@@ -92,86 +120,58 @@ git --version
 
 ---
 
-### 2. Installation
+### 2. Launch with a Custom Repository or Port
 
-Clone or navigate into the project directory and install the dependencies:
-
-```bash
-cd GITSIMULATION
-npm install
-```
-
----
-
-### 3. Launching GitChain Live
-
-Start the server:
-
-```bash
-npm start
-```
-
-You will see:
-```text
-====================================================
-🚀 GitChain Live visualizer running at:
-👉 http://localhost:3000
-📂 Active repository: C:\Users\...\GITSIMULATION
-====================================================
-```
-
-Open your browser and navigate to:
-```
-http://localhost:3000
-```
-
----
-
-### 4. Optional Configurations
-
-You can launch the visualizer pre-connected to any repository by passing the `REPO_PATH` environment variable or changing the port:
+You can launch the visualizer pre-connected to any repository on your machine:
 
 #### On Windows (PowerShell):
 ```powershell
-$env:REPO_PATH = "C:\Path\To\Your\Project"; npm start
+$env:REPO_PATH = "C:\Path\To\Your\Git\Project"; $env:PORT = "3000"; npm start
+```
+
+#### On Windows (CMD):
+```cmd
+set REPO_PATH=C:\Path\To\Your\Git\Project
+set PORT=3000
+npm start
 ```
 
 #### On Linux / macOS:
 ```bash
-REPO_PATH="/path/to/your/project" PORT=3000 npm start
+REPO_PATH="/path/to/your/git/project" PORT=3000 npm start
 ```
 
 ---
 
 ## 📖 How to Use the Tool
 
-### Connecting to Any Repository
-1. In the top bar, enter the path to any local Git project (for example `C:/Users/satya/my-project` or `../other-repo`).
-2. Click **Connect** (or press Enter).
-3. The server validates the repository, connects the watcher, and displays the commit chain diagram instantly.
+### 1. Connecting to Any Repository
+1. In the top bar input, type the directory path of any Git project (e.g. `C:/Projects/my-app` or `../other-repo`).
+2. Click **Connect** (or press `Enter`).
+3. The server validates the repository, connects the file watcher, and renders the commit chain diagram immediately.
 
-### Testing with the 1-Click Demo Repository
-If you don't have a repository ready to connect, click **"Load Demo Repo"** in the top bar.  
-GitChain Live will automatically generate a sample project featuring:
+### 2. Loading the Demo Repository
+Click **"Load Demo Repo"** in the top bar.  
+GitChain Live will automatically initialize a sample repository featuring:
 - Active branches (`main`, `feature/jwt-auth`, `feature/stripe-billing`)
 - Both pushed and unpushed commits
 - Merge commits with multi-parent curves
 - Semantic release tags (`v1.0.0`)
 
-### Observing Real-Time Updates
-Open your terminal in the connected repository and make a commit:
+### 3. Observing Real-Time Updates
+Open your terminal inside the connected repository and make a commit:
 ```bash
-git checkout -b feature/awesome-feature
-echo "Hello World" >> sample.txt
-git add sample.txt
-git commit -m "feat: add awesome feature"
+git checkout -b feature/user-profile
+echo "New Profile Feature" >> profile.txt
+git add profile.txt
+git commit -m "feat(profile): create user profile page"
 ```
-Look at your browser: the commit node and new branch swimlane appear **immediately without refreshing**.
+Look at your browser: the commit node and new branch swimlane appear **immediately without refreshing the page**.
 
-### Testing with the Git Simulator
+### 4. Testing with the Built-in Git Simulator
 1. Click **Git Simulator** in the top-right corner.
 2. Click **"Create Commit"**, **"New Feature Branch"**, or **"Push to Remote"**.
-3. Watch the changes reflect dynamically in the live diagram.
+3. Watch the graph update dynamically in real time.
 
 ---
 
@@ -193,7 +193,7 @@ GITSIMULATION/
 │       └── websocket.js    # WebSocket client with auto-reconnection
 ├── demo-repo-creator.js    # Standalone script to generate a rich demo repository
 ├── package.json            # Project manifest & dependencies
-└── README.md               # Documentation and usage guide
+└── README.md               # Documentation and run instructions
 ```
 
 ---
