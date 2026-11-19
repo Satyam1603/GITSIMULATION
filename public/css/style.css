@@ -1,0 +1,126 @@
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0b0f19;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Commit Row Styles */
+.commit-row {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.4);
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  position: relative;
+}
+
+.commit-row:hover {
+  background-color: rgba(30, 41, 59, 0.45);
+}
+
+.commit-row.selected {
+  background-color: rgba(14, 165, 233, 0.12) !important;
+  border-left: 3px solid #0ea5e9;
+}
+
+/* Swimlane and node visuals */
+.swimlane-col {
+  width: 28px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Node Rings and Markers */
+.node-circle {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.2s ease;
+  cursor: pointer;
+}
+
+.node-circle:hover {
+  transform: scale(1.35);
+}
+
+.node-pushed {
+  fill: #10b981;
+  stroke: #059669;
+}
+
+.node-unpushed {
+  fill: #f59e0b;
+  stroke: #d97706;
+  stroke-dasharray: 2 1;
+}
+
+.node-head-halo {
+  animation: headPulse 2s infinite ease-in-out;
+}
+
+@keyframes headPulse {
+  0% {
+    r: 9;
+    opacity: 0.8;
+  }
+  50% {
+    r: 13;
+    opacity: 0.2;
+  }
+  100% {
+    r: 9;
+    opacity: 0.8;
+  }
+}
+
+/* Graph SVG curves */
+.branch-curve {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-width 0.15s ease;
+}
+
+.branch-curve:hover {
+  stroke-width: 3.5px !important;
+}
+
+/* Pushed & Unpushed Commit Tag Styles */
+.pushed-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.unpushed-badge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Toasts */
+.toast {
+  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: auto;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
