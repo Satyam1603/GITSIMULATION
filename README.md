@@ -53,6 +53,12 @@ Whenever you run Git commands in your terminal or IDE (`git commit`, `git checko
   - Distinct lane colors for branches.
   - Active **`HEAD`** pointer with a pulsating halo.
   - Branch heads, remote references, and tags displayed as styled badges.
+- **🎬 Animated Flow & Timeline Replay Player:**
+  - Watch the evolution of your project replay before your eyes from the very first commit to the latest HEAD.
+  - Interactive playback bar with **Play / Pause**, **Step Forward / Backward**, and **Restart**.
+  - Scrub timeline slider to jump to any point in the history.
+  - Speed selector (`0.5x`, `1x`, `2x`, `4x`).
+  - Spring-scale commit node animations, drawing Bézier curves, and slide-in rows as commits emerge!
 - **🔍 Interactive Details & File Diff Drawer:**
   - Click on any commit node or row to slide out a detailed inspector drawer.
   - Full commit hash with 1-click clipboard copy.

@@ -80,6 +80,21 @@ const elements = {
   patchContainer: document.getElementById('patchContainer'),
   drawerPatch: document.getElementById('drawerPatch'),
 
+  // Animated Flow Playback Elements
+  animatedFlowBtn: document.getElementById('animatedFlowBtn'),
+  playbackBar: document.getElementById('playbackBar'),
+  playbackStepLabel: document.getElementById('playbackStepLabel'),
+  playbackCommitSubject: document.getElementById('playbackCommitSubject'),
+  playbackAuthorLabel: document.getElementById('playbackAuthorLabel'),
+  playbackSlider: document.getElementById('playbackSlider'),
+  closePlaybackBtn: document.getElementById('closePlaybackBtn'),
+  playToggleBtn: document.getElementById('playToggleBtn'),
+  playToggleIcon: document.getElementById('playToggleIcon'),
+  playToggleText: document.getElementById('playToggleText'),
+  playPrevBtn: document.getElementById('playPrevBtn'),
+  playNextBtn: document.getElementById('playNextBtn'),
+  playResetBtn: document.getElementById('playResetBtn'),
+
   toastContainer: document.getElementById('toastContainer')
 };
 
@@ -624,11 +639,189 @@ if (elements.simPushBtn) {
   });
 }
 
+// ================= Animated Flow / Timeline Playback =================
+
+const playback = {
+  active: false,
+  playing: false,
+  index: 0,
+  speed: 800,
+  timer: null,
+  commits: []
+};
+
+function startAnimatedFlow() {
+  if (!state.filteredCommits || state.filteredCommits.length === 0) {
+    window.showToast('No commits available to replay.', 'warning');
+    return;
+  }
+
+  // Clone chronological commits (oldest to newest)
+  playback.commits = [...state.filteredCommits].reverse();
+  playback.active = true;
+  playback.index = 0;
+  playback.playing = true;
+
+  // Set up slider range
+  elements.playbackSlider.min = 1;
+  elements.playbackSlider.max = playback.commits.length;
+  elements.playbackSlider.value = 1;
+
+  // Show playback bar
+  elements.playbackBar.classList.remove('hidden');
+  updatePlaybackPlayButton(true);
+
+  // Render initial commit
+  renderPlaybackStep(0);
+
+  // Start auto-playback
+  startPlaybackTimer();
+
+  window.showToast('Animated Flow started! Replaying commit history...', 'info');
+}
+
+function stopAnimatedFlow() {
+  pausePlaybackTimer();
+  playback.active = false;
+  elements.playbackBar.classList.add('hidden');
+  // Restore full diagram
+  applyFilters();
+}
+
+function renderPlaybackStep(stepIndex) {
+  if (stepIndex < 0) stepIndex = 0;
+  if (stepIndex >= playback.commits.length) stepIndex = playback.commits.length - 1;
+  playback.index = stepIndex;
+
+  const currentCommit = playback.commits[stepIndex];
+  // Subset to render: all commits from root up to stepIndex, ordered in standard display order (newest first)
+  const currentSubset = playback.commits.slice(0, stepIndex + 1).reverse();
+
+  // Recompute swimlanes
+  assignDynamicSwimlanes(currentSubset);
+
+  // Render with animatedCommitHash
+  graphRenderer.render(currentSubset, currentCommit.hash);
+
+  // Update UI Labels
+  elements.playbackStepLabel.textContent = `Step ${stepIndex + 1} / ${playback.commits.length}`;
+  elements.playbackCommitSubject.textContent = currentCommit.subject;
+  elements.playbackCommitSubject.title = currentCommit.subject;
+  elements.playbackAuthorLabel.textContent = `by ${currentCommit.author.name}`;
+  elements.playbackSlider.value = stepIndex + 1;
+
+  // Smoothly scroll to the new commit row
+  const activeRow = elements.commitsContainer.querySelector(`[data-hash="${currentCommit.hash}"]`);
+  if (activeRow) {
+    activeRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function startPlaybackTimer() {
+  pausePlaybackTimer();
+  playback.playing = true;
+  updatePlaybackPlayButton(true);
+
+  playback.timer = setInterval(() => {
+    if (playback.index < playback.commits.length - 1) {
+      renderPlaybackStep(playback.index + 1);
+    } else {
+      // Reached the end
+      pausePlaybackTimer();
+      updatePlaybackPlayButton(false);
+      window.showToast('Reached latest commit in timeline!', 'success');
+    }
+  }, playback.speed);
+}
+
+function pausePlaybackTimer() {
+  if (playback.timer) {
+    clearInterval(playback.timer);
+    playback.timer = null;
+  }
+  playback.playing = false;
+  updatePlaybackPlayButton(false);
+}
+
+function togglePlayback() {
+  if (playback.playing) {
+    pausePlaybackTimer();
+  } else {
+    if (playback.index >= playback.commits.length - 1) {
+      // Restart if at the end
+      renderPlaybackStep(0);
+    }
+    startPlaybackTimer();
+  }
+}
+
+function updatePlaybackPlayButton(isPlaying) {
+  if (elements.playToggleIcon && elements.playToggleText) {
+    elements.playToggleIcon.setAttribute('data-lucide', isPlaying ? 'pause' : 'play');
+    elements.playToggleText.textContent = isPlaying ? 'Pause' : 'Play';
+    if (window.lucide) window.lucide.createIcons();
+  }
+}
+
+// Attach Animated Flow Listeners
+if (elements.animatedFlowBtn) {
+  elements.animatedFlowBtn.addEventListener('click', startAnimatedFlow);
+}
+if (elements.closePlaybackBtn) {
+  elements.closePlaybackBtn.addEventListener('click', stopAnimatedFlow);
+}
+if (elements.playToggleBtn) {
+  elements.playToggleBtn.addEventListener('click', togglePlayback);
+}
+if (elements.playPrevBtn) {
+  elements.playPrevBtn.addEventListener('click', () => {
+    pausePlaybackTimer();
+    renderPlaybackStep(playback.index - 1);
+  });
+}
+if (elements.playNextBtn) {
+  elements.playNextBtn.addEventListener('click', () => {
+    pausePlaybackTimer();
+    renderPlaybackStep(playback.index + 1);
+  });
+}
+if (elements.playResetBtn) {
+  elements.playResetBtn.addEventListener('click', () => {
+    pausePlaybackTimer();
+    renderPlaybackStep(0);
+  });
+}
+if (elements.playbackSlider) {
+  elements.playbackSlider.addEventListener('input', (e) => {
+    pausePlaybackTimer();
+    renderPlaybackStep(parseInt(e.target.value, 10) - 1);
+  });
+}
+
+// Speed buttons
+document.querySelectorAll('.speed-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.speed-btn').forEach(b => {
+      b.className = 'speed-btn px-2 py-0.5 rounded text-[10px] text-slate-400 hover:text-white transition-colors cursor-pointer';
+    });
+    btn.className = 'speed-btn px-2 py-0.5 rounded text-[10px] bg-indigo-600 text-white font-semibold transition-colors cursor-pointer';
+    playback.speed = parseInt(btn.dataset.speed, 10) || 800;
+    if (playback.playing) {
+      startPlaybackTimer();
+    }
+  });
+});
+
 // Keyboard Shortcuts
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeCommitDrawer();
     elements.simulateModal.classList.add('hidden');
+    if (playback.active) stopAnimatedFlow();
+  }
+  if (e.key === ' ' && playback.active && document.activeElement !== elements.searchInput && document.activeElement !== elements.repoPathInput) {
+    e.preventDefault();
+    togglePlayback();
   }
   if (e.key === '/' && document.activeElement !== elements.searchInput && document.activeElement !== elements.repoPathInput) {
     e.preventDefault();

@@ -41,8 +41,9 @@ class GitGraphRenderer {
   /**
    * Render the complete commits diagram
    */
-  render(commits) {
+  render(commits, animatedCommitHash = null) {
     this.commits = commits;
+    this.animatedCommitHash = animatedCommitHash;
     this.commitMap.clear();
     commits.forEach(c => this.commitMap.set(c.hash, c));
 
@@ -156,6 +157,9 @@ class GitGraphRenderer {
           const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
           path.setAttribute('d', d);
           path.setAttribute('class', 'branch-curve');
+          if (this.animatedCommitHash && commit.hash === this.animatedCommitHash) {
+            path.classList.add('curve-draw-animation');
+          }
           path.setAttribute('stroke', strokeColor);
           path.setAttribute('stroke-width', '2.2');
           path.setAttribute('opacity', '0.75');
@@ -198,6 +202,9 @@ class GitGraphRenderer {
     circle.setAttribute('cy', cy);
     circle.setAttribute('r', this.nodeRadius.toString());
     circle.setAttribute('class', 'node-circle');
+    if (this.animatedCommitHash && commit.hash === this.animatedCommitHash) {
+      circle.classList.add('node-spawn-animation');
+    }
 
     // Visual indicators for Pushed vs Unpushed (Local)
     if (commit.isPushed) {
@@ -242,6 +249,9 @@ class GitGraphRenderer {
   renderCommitRow(commit, index, graphWidth) {
     const row = document.createElement('div');
     row.className = 'commit-row flex items-center pr-4 text-xs';
+    if (this.animatedCommitHash && commit.hash === this.animatedCommitHash) {
+      row.classList.add('row-fade-in');
+    }
     row.dataset.hash = commit.hash;
     row.style.height = `${this.rowHeight}px`;
 
