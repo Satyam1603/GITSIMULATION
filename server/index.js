@@ -128,16 +128,25 @@ app.get('/api/commit/:hash', async (req, res) => {
 });
 
 /**
- * Switch active repository path
+ * Switch active repository path or clone GitHub repository
  */
 app.post('/api/set-repo', async (req, res) => {
   try {
-    const targetPath = req.body.repoPath;
-    if (!targetPath) {
-      return res.status(400).json({ error: 'repoPath is required' });
+    const targetInput = req.body.repoPath;
+    if (!targetInput || !targetInput.trim()) {
+      return res.status(400).json({ error: 'repoPath or GitHub URL is required' });
     }
 
-    const resolved = path.resolve(targetPath);
+    let resolved = targetInput.trim();
+
+    // Check if input is a GitHub or remote Git repository URL
+    if (GitService.isRemoteUrl(resolved)) {
+      console.log(`[API] Remote GitHub URL detected: ${resolved}`);
+      resolved = await GitService.cloneOrFetchRemote(resolved, path.join(__dirname, '..'));
+    } else {
+      resolved = path.resolve(resolved);
+    }
+
     const isValid = await GitService.isValidRepo(resolved);
     if (!isValid) {
       return res.status(400).json({

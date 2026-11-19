@@ -31,6 +31,78 @@ class GitService {
   }
 
   /**
+   * Check if input string is a remote Git or GitHub URL
+   */
+  static isRemoteUrl(input) {
+    if (!input || typeof input !== 'string') return false;
+    const trimmed = input.trim();
+    return (
+      trimmed.startsWith('https://') ||
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('git@') ||
+      trimmed.startsWith('git://') ||
+      /^(?:[\w.-]+@)?github\.com[/:]/.test(trimmed)
+    );
+  }
+
+  /**
+   * Clone or fetch a remote Git / GitHub repository into cloned_repos cache
+   */
+  static async cloneOrFetchRemote(remoteUrl, baseDir) {
+    let cleanUrl = remoteUrl.trim();
+    if (!cleanUrl.includes('://') && !cleanUrl.startsWith('git@')) {
+      cleanUrl = `https://${cleanUrl}`;
+    }
+
+    // Extract repository owner & name (e.g. "expressjs/express" from "https://github.com/expressjs/express.git")
+    const urlClean = cleanUrl.replace(/\.git$/, '');
+    const parts = urlClean.split(/[/:]/).filter(Boolean);
+    const repoName = parts[parts.length - 1] || 'repo';
+    const ownerName = parts[parts.length - 2] || 'github';
+    const safeDirName = `${ownerName}_${repoName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    const clonedReposDir = path.resolve(baseDir, 'cloned_repos');
+    if (!fs.existsSync(clonedReposDir)) {
+      fs.mkdirSync(clonedReposDir, { recursive: true });
+    }
+
+    const targetPath = path.join(clonedReposDir, safeDirName);
+
+    if (fs.existsSync(targetPath) && await this.isValidRepo(targetPath)) {
+      console.log(`[GitService] Repository already cached. Fetching latest updates for ${cleanUrl}...`);
+      try {
+        await this.runGit('git fetch --all --prune', targetPath);
+      } catch (err) {
+        console.warn('[GitService] Fetch warning:', err.message);
+      }
+      return targetPath;
+    }
+
+    console.log(`[GitService] Cloning remote repository ${cleanUrl} into ${targetPath}...`);
+    return new Promise((resolve, reject) => {
+      // Try fast blobless clone first, then fallback to standard clone
+      exec(`git clone --filter=blob:none "${cleanUrl}" "${targetPath}"`, { timeout: 180000 }, (err) => {
+        if (!err) {
+          console.log(`[GitService] Successfully cloned ${cleanUrl}`);
+          return resolve(targetPath);
+        }
+        // Fallback to standard git clone
+        console.log(`[GitService] Blob-filter not supported, performing standard clone...`);
+        exec(`git clone "${cleanUrl}" "${targetPath}"`, { timeout: 300000 }, (err2, stdout, stderr) => {
+          if (err2) {
+            if (fs.existsSync(targetPath)) {
+              try { fs.rmSync(targetPath, { recursive: true, force: true }); } catch {}
+            }
+            return reject(new Error(`Failed to clone GitHub repository (${cleanUrl}): ${stderr.trim() || err2.message}`));
+          }
+          console.log(`[GitService] Successfully cloned ${cleanUrl}`);
+          resolve(targetPath);
+        });
+      });
+    });
+  }
+
+  /**
    * Get the .git directory path
    */
   static async getGitDir(repoPath) {

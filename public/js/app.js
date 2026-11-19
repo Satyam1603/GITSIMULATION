@@ -439,14 +439,23 @@ function closeCommitDrawer() {
 }
 
 /**
- * Switch repository to path entered by user
+ * Switch repository to path entered by user (or clone GitHub link)
  */
 async function handleSwitchRepo(targetPath) {
   if (!targetPath) return;
 
+  const isRemote = targetPath.startsWith('http://') ||
+                   targetPath.startsWith('https://') ||
+                   targetPath.startsWith('git@') ||
+                   targetPath.includes('github.com');
+
   elements.connectBtn.disabled = true;
-  elements.connectBtn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Connecting...</span>`;
+  elements.connectBtn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>${isRemote ? 'Cloning Repo...' : 'Connecting...'}</span>`;
   if (window.lucide) window.lucide.createIcons();
+
+  if (isRemote) {
+    window.showToast('Fetching/Cloning remote GitHub repository... please wait.', 'info');
+  }
 
   try {
     const res = await fetch('/api/set-repo', {
@@ -457,10 +466,10 @@ async function handleSwitchRepo(targetPath) {
 
     const data = await res.json();
     if (!res.ok) {
-      throw new Error(data.error || 'Failed to switch repository');
+      throw new Error(data.error || 'Failed to connect to repository');
     }
 
-    window.showToast(`Switched repository to ${data.repoPath}`, 'success');
+    window.showToast(isRemote ? `Successfully connected to GitHub repo!` : `Switched repository to ${data.repoPath}`, 'success');
     await loadRepositoryData();
   } catch (err) {
     window.showToast(err.message, 'error');

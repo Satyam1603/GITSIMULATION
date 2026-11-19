@@ -1,4 +1,6 @@
 node_modules/
 demo_git_repo/
+demo_git_repo_remote.git/
+cloned_repos/
 .DS_Store
 *.log

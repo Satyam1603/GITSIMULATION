@@ -145,10 +145,12 @@ REPO_PATH="/path/to/your/git/project" PORT=3000 npm start
 
 ## 📖 How to Use the Tool
 
-### 1. Connecting to Any Repository
-1. In the top bar input, type the directory path of any Git project (e.g. `C:/Projects/my-app` or `../other-repo`).
-2. Click **Connect** (or press `Enter`).
-3. The server validates the repository, connects the file watcher, and renders the commit chain diagram immediately.
+### 1. Connecting to Any Local Repository or GitHub Link
+- **Local Repository:** In the top bar input, type the directory path of any local Git project (e.g. `C:/Projects/my-app` or `../other-repo`).
+- **GitHub Repository Link:** Paste any public GitHub repository link (e.g. `https://github.com/expressjs/express` or `https://github.com/torvalds/linux.git`).
+- Click **Connect** (or press `Enter`).
+  - For local projects, GitChain Live attaches the watcher and loads the commit DAG immediately.
+  - For GitHub links, GitChain Live clones the repository into the local cache (`./cloned_repos/`) using fast blobless clone and renders its full commit history and branch tracks!
 
 ### 2. Loading the Demo Repository
 Click **"Load Demo Repo"** in the top bar.  
